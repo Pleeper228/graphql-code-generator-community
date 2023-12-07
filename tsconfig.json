@@ -46,6 +46,9 @@
       "@graphql-codegen/typescript-graphql-files-modules": [
         "packages/plugins/typescript/graphql-files-modules/src/index.ts"
       ],
+      "@graphql-codegen/typescript-msw-test-engine": [
+        "packages/plugins/typescript/msw-test-engine/src/index.ts"
+      ],
       "@graphql-codegen/typescript-graphql-request": [
         "packages/plugins/typescript/graphql-request/src/index.ts"
       ],

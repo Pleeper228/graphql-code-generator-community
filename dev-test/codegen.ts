@@ -4,6 +4,26 @@ const config: CodegenConfig = {
   hooks: { afterAllFileWrite: ['prettier --write'] },
   emitLegacyCommonJSImports: false,
   generates: {
+    './dev-test/msw-test-engine/engine.ts': {
+      schema: './dev-test/msw-test-engine/schema.graphql',
+      documents: ['./dev-test/msw-test-engine/**/*.gql'],
+      plugins: ['typescript-msw-test-engine'],
+    },
+    './dev-test/msw-test-engine/handlers.ts': {
+      schema: './dev-test/msw-test-engine/schema.graphql',
+      documents: ['./dev-test/msw-test-engine/**/*.gql'],
+      plugins: ['typescript-msw'],
+    },
+    './dev-test/msw-test-engine/operations.ts': {
+      schema: './dev-test/msw-test-engine/schema.graphql',
+      documents: ['./dev-test/msw-test-engine/**/*.gql'],
+      plugins: ['typescript', 'typescript-operations'],
+    },
+    './dev-test/msw-test-engine/named.ts': {
+      schema: './dev-test/msw-test-engine/schema.graphql',
+      documents: ['./dev-test/msw-test-engine/**/*.gql'],
+      plugins: ['named-operations-object'],
+    },
     './dev-test/test-schema/flow-types.flow.js': {
       schema: './dev-test/test-schema/schema.json',
       plugins: ['flow', 'flow-resolvers'],
