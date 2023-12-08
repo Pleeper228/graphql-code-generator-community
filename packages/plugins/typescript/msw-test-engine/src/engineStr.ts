@@ -38,6 +38,98 @@ interface AdcEngine {
   when<T extends keyof NamedOperationHandlers>(operationName: T): EngineMatchesFn<T>;
 }
 
-export function setupEngine(mockServer: SetupServer, namedHandlers: NamedHandlerMap): AdcEngine {
-  return {} as AdcEngine;
-}`;
+interface MockedOperation<T extends keyof NamedOperationHandlers> {
+  /** check if the request matches  */
+  matcher(req: EngineRequest<T>): boolean;
+
+  /** build the response for the request */
+  responder(req: EngineRequest<T>): EngineResponse<T>;
+}
+
+class MockAdcEngine implements AdcEngine {
+  namedHandlers: NamedOperationHandlers;
+  mockedOperationsMap: {
+    [P in keyof NamedOperationHandlers]: MockedOperation<P>[];
+  };
+
+  constructor(namedHandlers: NamedOperationHandlers) {
+    this.namedHandlers = namedHandlers;
+
+    let mockedOperationsMap = {} as any;
+    Object.keys(namedHandlers).forEach((operationName) => {
+      mockedOperationsMap[operationName] = [];
+    });
+    this.mockedOperationsMap = mockedOperationsMap;
+  }
+  when<K extends keyof NamedOperationHandlers>(operationName: K): EngineMatchesFn<K> {
+    let matcher: (req: EngineRequest<K>) => boolean;
+    let responder: (req: EngineRequest<K>) => EngineResponse<K>;
+
+    const responseFn = (arg: any) => {
+      if (typeof arg === "function") {
+        responder = arg;
+      } else {
+        responder = () => arg;
+      }
+      this.mockedOperationsMap[operationName].push({
+        matcher,
+        responder,
+      });
+    };
+    const matchesFn = (arg: any) => {
+      if (typeof arg === "function") {
+        matcher = arg;
+      } else {
+        matcher = (req: any) => fastDeepEqual(req.variables, arg.variables);
+      }
+      return {
+        response: responseFn,
+      };
+    };
+    return { matches: matchesFn } as EngineMatchesFn<K>;
+  }
+
+  reset() {
+    let mockedOperationsMap = {} as any;
+    Object.keys(this.namedHandlers).forEach((operationName) => {
+      mockedOperationsMap[operationName] = [];
+    });
+    this.mockedOperationsMap = mockedOperationsMap;
+  }
+
+  getHandlers(): RequestHandler[] {
+    return Object.entries(this.namedHandlers).map(([operationName, handler]) => {
+      return handler((req, res, ctx) => {
+        return this.handleOperation(req, res, ctx, operationName as keyof NamedOperationHandlers);
+      });
+    });
+  }
+
+  handleOperation(
+    req: GraphQLRequest<any>,
+    res: Arguments<ResponseResolver<any>>[1],
+    ctx: GraphQLContext<any>,
+    operationName: keyof NamedOperationHandlers,
+  ) {
+    const mockedOperations = this.mockedOperationsMap[operationName];
+    const matchedMock = mockedOperations.find((mock) => {
+      return mock.matcher(req);
+    });
+
+    if (matchedMock) {
+      return res(ctx.data(matchedMock.responder(req).data));
+    } else {
+      return this.handleMockNotFound(req, res, ctx);
+    }
+  }
+
+  handleMockNotFound(req: GraphQLRequest<any>, res: Arguments<ResponseResolver<any>>[1], ctx: GraphQLContext<any>) {
+    const message = \`[\${req.operationName}]: No mocks match the incoming request\`;
+    console.group(message);
+    console.dir(req.variables);
+    console.groupEnd();
+    return res(ctx.errors([{ message: message }]));
+  }
+}
+
+export const engine = new MockAdcEngine(namedOperationHandlers);`;

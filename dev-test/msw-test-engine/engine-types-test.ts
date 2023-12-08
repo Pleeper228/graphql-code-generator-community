@@ -1,6 +1,4 @@
-import { namedOperationHandlers, setupEngine } from './engine';
-
-const engine = setupEngine({} as any, namedOperationHandlers);
+import { engine } from './engine';
 
 engine
   .when('User')

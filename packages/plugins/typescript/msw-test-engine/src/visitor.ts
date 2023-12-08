@@ -42,8 +42,9 @@ export class MSWTestEngineVisitor extends ClientSideBaseVisitor<
     }
 
     return [
-      'import { GraphQLContext, GraphQLRequest, ResponseResolver } from "msw";',
-      'import { SetupServer } from "msw/node";',
+      'import fastDeepEqual from "fast-deep-equal";',
+      'import { GraphQLContext, GraphQLRequest, RequestHandler, ResponseResolver } from "msw";',
+      'import { Arguments } from "tsdef";',
       `import * as Handlers from "${this.config.handlersPath}"`,
     ];
   }
