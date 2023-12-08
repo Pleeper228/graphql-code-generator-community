@@ -3,7 +3,13 @@ import fastDeepEqual from 'fast-deep-equal';
 import { GraphQLError } from 'graphql';
 import { graphql, GraphQLContext, GraphQLHandler, GraphQLRequest, ResponseResolver } from 'msw';
 import { Arguments } from 'tsdef';
+import { mockUpdateUserMutation, mockUserQuery } from './handlers';
 import { namedOperations } from './named';
+
+export const namedOperationHandlers = {
+  User: mockUserQuery,
+  UpdateUser: mockUpdateUserMutation,
+};
 
 type NamedQueryOperations = keyof typeof namedOperations.Query;
 type NamedMutationOperations = keyof typeof namedOperations.Mutation;
