@@ -6,7 +6,7 @@ import * as Handlers from './handlers';
 export const namedOperationHandlers = {
   User: Handlers.mockUserQuery,
   UpdateUser: Handlers.mockUpdateUserMutation,
-};
+} as const;
 
 export type NamedHandlerMap<T extends string = string> = Record<
   T,

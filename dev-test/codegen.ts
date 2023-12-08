@@ -7,6 +7,7 @@ const config: CodegenConfig = {
     './dev-test/msw-test-engine/engine.ts': {
       schema: './dev-test/msw-test-engine/schema.graphql',
       documents: ['./dev-test/msw-test-engine/**/*.gql'],
+      config: { handlersPath: './handlers' },
       plugins: ['typescript-msw-test-engine'],
     },
     './dev-test/msw-test-engine/handlers.ts': {

@@ -8,12 +8,10 @@ import {
  */
 export interface MSWTestEngineConfig {
   /**
-   * @description GraphQL endpoint to use when working with multiple backends.
-   *
-   * @see https://mswjs.io/docs/api/graphql/link
+   * @description Required, should point to the module that contains all generated msw handlers
    *
    * @exampleMarkdown
-   * ```ts filename="codegen.ts"
+   * ```ts filename="codegen.ts" {10}
    *  import type { CodegenConfig } from '@graphql-codegen/cli';
    *
    *  const config: CodegenConfig = {
@@ -22,10 +20,7 @@ export interface MSWTestEngineConfig {
    *      'path/to/file.ts': {
    *        // plugins...
    *        config: {
-   *          link: {
-   *            name: 'stripe',
-   *            endpoint: 'https://api.stripe.com/graphql'
-   *          }
+   *          handlersPath: '../queries'
    *        },
    *      },
    *    },
@@ -33,11 +28,7 @@ export interface MSWTestEngineConfig {
    *  export default config;
    * ```
    */
-  link?: {
-    endpoint: string;
-    name: string;
-    withSuffix?: boolean;
-  };
+  handlersPath: string;
 }
 
 export interface MSWTestEngineRawPluginConfig

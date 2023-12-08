@@ -27,7 +27,9 @@ export class MSWTestEngineVisitor extends ClientSideBaseVisitor<
     fragments: LoadedFragment[],
     rawConfig: MSWTestEngineRawPluginConfig,
   ) {
-    super(schema, fragments, rawConfig, { link: getConfigValue(rawConfig.link, undefined) });
+    super(schema, fragments, rawConfig, {
+      handlersPath: getConfigValue(rawConfig.handlersPath, undefined),
+    });
 
     autoBind(this);
   }
@@ -42,7 +44,7 @@ export class MSWTestEngineVisitor extends ClientSideBaseVisitor<
     return [
       'import { GraphQLContext, GraphQLRequest, ResponseResolver } from "msw";',
       'import { SetupServer } from "msw/node";',
-      `import * as Handlers from "./handlers"`,
+      `import * as Handlers from "${this.config.handlersPath}"`,
     ];
   }
 

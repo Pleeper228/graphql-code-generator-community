@@ -10,7 +10,7 @@ describe('msw-test-engine', () => {
   ];
 
   it('Should generate engine', async () => {
-    const result = await plugin(null, documents, {});
+    const result = await plugin(null, documents, { handlersPath: './handlers' });
 
     expect(result.prepend).toMatchSnapshot('imports');
     expect(result.content).toMatchSnapshot('content');
