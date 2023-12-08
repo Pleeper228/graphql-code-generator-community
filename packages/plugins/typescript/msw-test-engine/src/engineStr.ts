@@ -47,12 +47,15 @@ interface MockedOperation<T extends keyof NamedOperationHandlers> {
 }
 
 class MockAdcEngine implements AdcEngine {
+  mockServer: SetupServer;
   namedHandlers: NamedOperationHandlers;
   mockedOperationsMap: {
     [P in keyof NamedOperationHandlers]: MockedOperation<P>[];
   };
 
-  constructor(namedHandlers: NamedOperationHandlers) {
+  constructor(mockServer: SetupServer, namedHandlers: NamedOperationHandlers) {
+    this.mockServer = mockServer;
+
     this.namedHandlers = namedHandlers;
 
     let mockedOperationsMap = {} as any;
@@ -61,7 +64,13 @@ class MockAdcEngine implements AdcEngine {
     });
     this.mockedOperationsMap = mockedOperationsMap;
   }
+
   when<K extends keyof NamedOperationHandlers>(operationName: K): EngineMatchesFn<K> {
+    // register this handler with msw once the response is specified.
+    const ourHandler = this.namedHandlers[operationName]((req, res, ctx) => {
+      return this.handleOperation(req, res, ctx, operationName as keyof NamedOperationHandlers);
+    });
+
     let matcher: (req: EngineRequest<K>) => boolean;
     let responder: (req: EngineRequest<K>) => EngineResponse<K>;
 
@@ -71,6 +80,7 @@ class MockAdcEngine implements AdcEngine {
       } else {
         responder = () => arg;
       }
+      this.mockServer.use(ourHandler);
       this.mockedOperationsMap[operationName].push({
         matcher,
         responder,
@@ -86,7 +96,9 @@ class MockAdcEngine implements AdcEngine {
         response: responseFn,
       };
     };
-    return { matches: matchesFn } as EngineMatchesFn<K>;
+    return {
+      matches: matchesFn,
+    } as EngineMatchesFn<K>;
   }
 
   reset() {
@@ -132,4 +144,6 @@ class MockAdcEngine implements AdcEngine {
   }
 }
 
-export const engine = new MockAdcEngine(namedOperationHandlers);`;
+export function setupEngine(mockServer: SetupServer): MockAdcEngine {
+  return new MockAdcEngine(mockServer, namedOperationHandlers);
+}`;

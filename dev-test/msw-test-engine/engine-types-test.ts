@@ -1,5 +1,6 @@
-import { engine } from './engine';
+import { setupEngine } from './engine';
 
+const engine = setupEngine({} as any);
 engine
   .when('User')
   .matches({
