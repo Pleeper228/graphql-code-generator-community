@@ -10,7 +10,7 @@ import { MSWTestEnginePluginConfig, MSWTestEngineRawPluginConfig } from './confi
 import { engineStr } from './engineStr';
 
 const formatHandler = (value: string, operationType: string) =>
-  `mock${pascalCase(value)}${operationType}`;
+  `Handlers.mock${pascalCase(value)}${operationType}`;
 
 export class MSWTestEngineVisitor extends ClientSideBaseVisitor<
   MSWTestEngineRawPluginConfig,
@@ -39,17 +39,10 @@ export class MSWTestEngineVisitor extends ClientSideBaseVisitor<
       return [];
     }
 
-    const handlers = this._operationsToInclude.map(({ node, operationType }) =>
-      formatHandler(node.name.value, operationType),
-    );
-
     return [
-      'import fastDeepEqual from "fast-deep-equal";',
-      'import { GraphQLError } from "graphql";',
-      'import { graphql, GraphQLContext, GraphQLHandler, GraphQLRequest, ResponseResolver } from "msw";',
-      'import { Arguments } from "tsdef";',
-      `import { ${handlers.join(', ')} } from "./handlers"`,
-      'import { namedOperations } from "./named";',
+      'import { GraphQLContext, GraphQLRequest, ResponseResolver } from "msw";',
+      'import { SetupServer } from "msw/node";',
+      `import * as Handlers from "./handlers"`,
     ];
   }
 
@@ -61,7 +54,7 @@ export class MSWTestEngineVisitor extends ClientSideBaseVisitor<
             `'${node.name.value}': ${formatHandler(node.name.value, operationType)},`,
         )
         .join('\n')}
-    }`;
+    } as const`;
 
     return [namedOperationHandlersStr, engineStr].join('\n');
   }
